@@ -30,19 +30,20 @@ import com.igormaznitsa.meta.annotation.MustNotContainNull;
 
 public final class InfoHelper {
 
+  public static final String DELIMITER = "-------------------------------------------------";
+  
   private InfoHelper() {
   }
 
-  public static final String DELIMITER = "-------------------------------------------------";
 
   @Nonnull
   public static String getVersion() {
-    return "v6.1.1";
+    return "v6.1.2";
   }
 
   @Nonnull
   public static String getCopyright() {
-    return "2003-2016 Author: Igor A. Maznitsa (igor.maznitsa@igormaznitsa.com)";
+    return "2003-2017 Author: Igor A. Maznitsa (igor.maznitsa@igormaznitsa.com)";
   }
 
   @Nonnull

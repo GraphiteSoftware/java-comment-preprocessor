@@ -54,6 +54,10 @@
             <configuration>
               <allowWhitespace>true</allowWhitespace>
               <careForLastNextLine>true</careForLastNextLine>
+              <verbose>true</verbose>
+              <excludedFolders>
+                <folder>**/excludedfolder</folder>
+              </excludedFolders>
             </configuration>
           </execution>
           <execution>

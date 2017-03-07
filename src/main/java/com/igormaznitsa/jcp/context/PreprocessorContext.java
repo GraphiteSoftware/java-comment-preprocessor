@@ -37,6 +37,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import com.igormaznitsa.meta.annotation.MustNotContainNull;
 import static com.igormaznitsa.meta.common.utils.Assertions.assertNotNull;
+import com.igormaznitsa.meta.common.utils.Assertions;
 
 /**
  * The preprocessor context class is a main class which contains all options of the preprocessor and allows to work with variables in expressions
@@ -85,6 +86,8 @@ public final class PreprocessorContext {
 
   private final TextFileDataContainer currentInCloneSource;
 
+  private String [] excludedFolderPatterns = new String[0];
+  
   /**
    * The constructor
    */
@@ -97,6 +100,29 @@ public final class PreprocessorContext {
     this.currentInCloneSource = null;
   }
 
+  /**
+   * Set patterns for excluded folders.
+   * @param patterns array contains Ant path patterns
+   */
+  public void setExcludedFolderPatterns(@MustNotContainNull @Nonnull final String ... patterns) {
+    final String [] value = Assertions.assertDoesntContainNull(Assertions.assertNotNull(patterns));
+    final String [] normalized = new String[value.length];
+    for(int i=0;i<value.length;i++){
+      normalized[i] = FilenameUtils.normalize(value[i],true);
+    }
+    this.excludedFolderPatterns = normalized;
+  }
+  
+  /**
+   * Get patterns for excluded folders.
+   * @return array of patterns in Ant pattern format
+   */
+  @Nonnull
+  @MustNotContainNull
+  public String [] getExcludedFolderPatterns() {
+    return this.excludedFolderPatterns.clone();
+  }
+  
   /**
    * Set the flag to care to be precise in processing the last file next line char
    *
