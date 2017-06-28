@@ -1,5 +1,5 @@
 /* 
- * Copyright 2014 Igor Maznitsa (http://www.igormaznitsa.com).
+ * Copyright 2017 Igor Maznitsa (http://www.igormaznitsa.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,58 +20,48 @@ import javax.annotation.Nonnull;
 import com.igormaznitsa.jcp.context.PreprocessorContext;
 import com.igormaznitsa.jcp.expression.Value;
 import com.igormaznitsa.jcp.expression.ValueType;
-import com.igormaznitsa.meta.annotation.MustNotContainNull;
+
+import com.igormaznitsa.jcp.utils.PreprocessorUtils;
 
 /**
- * The class implements the IS function handler
+ * The class implements the TRIMLINES function handler
  *
  * @author Igor Maznitsa (igor.maznitsa@igormaznitsa.com)
  */
-public final class FunctionIS extends AbstractFunction {
-
-  private static final ValueType[][] SIGNATURES = new ValueType[][]{{ValueType.STRING,ValueType.ANY}};
+public final class FunctionTRIMLINES extends AbstractStrConverter {
 
   @Override
   @Nonnull
   public String getName() {
-    return "is";
+    return "trimlines";
   }
 
+  @Override
   @Nonnull
-  public Value executeStrAny(@Nonnull final PreprocessorContext context, @Nonnull final Value varName, @Nonnull final Value value) {
-    final Value currentValue = context.findVariableForName(varName.asString(), false);
+  public Value executeStr(@Nonnull final PreprocessorContext context, @Nonnull final Value value) {
+    final String text = value.asString();
+    final StringBuilder result = new StringBuilder(text.length());
 
-    Value result = Value.BOOLEAN_FALSE;
-    
-    if (currentValue != null) {
-      result =  value.toString().compareTo(currentValue.toString()) == 0 ? Value.BOOLEAN_TRUE : Value.BOOLEAN_FALSE;
+    for(final String s : PreprocessorUtils.splitForChar(text, '\n')){
+      final String trimmed = s.trim();
+      if (!trimmed.isEmpty()) {
+        if (result.length()>0) result.append(PreprocessorUtils.getNextLineCodes());
+        result.append(trimmed);
+      }
     }
     
-    return result;
-  }
-
-  @Override
-  public int getArity() {
-    return 2;
-  }
-
-  @Override
-  @Nonnull
-  @MustNotContainNull
-  public ValueType[][] getAllowedArgumentTypes() {
-    return SIGNATURES;
+    return Value.valueOf(result.toString());
   }
 
   @Override
   @Nonnull
   public String getReference() {
-    return "check that variable exists and compare value";
+    return "trim each line in string, empty lines will be removed";
   }
 
   @Override
   @Nonnull
   public ValueType getResultType() {
-    return ValueType.BOOLEAN;
+    return ValueType.STRING;
   }
-
 }

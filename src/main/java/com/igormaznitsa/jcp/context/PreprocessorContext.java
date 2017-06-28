@@ -61,7 +61,9 @@ public final class PreprocessorContext {
   private boolean compareDestination = false;
   private boolean allowWhitespace = false;
   private boolean preserveIndent = false;
-
+  private boolean copyFileAttributes = false;
+  private boolean unknownVariableAsFalse = false;
+  
   private String sourceDirectories;
   private String destinationDirectory;
   private File destinationDirectoryFile;
@@ -164,7 +166,7 @@ public final class PreprocessorContext {
     this.destinationDirectory = context.destinationDirectory;
     this.destinationDirectoryFile = context.destinationDirectoryFile;
     this.sourceDirectoryFiles = context.sourceDirectoryFiles.clone();
-
+    this.copyFileAttributes = context.copyFileAttributes;
     this.careForLastNextLine = context.careForLastNextLine;
 
     this.processingFileExtensions.clear();
@@ -173,6 +175,8 @@ public final class PreprocessorContext {
     this.excludedFileExtensions.clear();
     this.excludedFileExtensions.addAll(context.excludedFileExtensions);
 
+    this.unknownVariableAsFalse = context.unknownVariableAsFalse;
+    
     this.preprocessorExtension = context.preprocessorExtension;
     this.inCharacterEncoding = context.inCharacterEncoding;
     this.outCharacterEncoding = context.outCharacterEncoding;
@@ -180,6 +184,8 @@ public final class PreprocessorContext {
 
     this.globalVarTable.putAll(context.globalVarTable);
     this.localVarTable.putAll(context.localVarTable);
+    this.excludedFolderPatterns = context.excludedFolderPatterns.clone();
+    
     this.mapVariableNameToSpecialVarProcessor.putAll(context.mapVariableNameToSpecialVarProcessor);
     this.sharedResources.putAll(context.sharedResources);
 
@@ -187,6 +193,8 @@ public final class PreprocessorContext {
 
     this.currentState = assertNotNull(context.currentState);
     this.cloned = true;
+    
+    this.preprocessorLogger = context.preprocessorLogger;
     
     final PreprocessingState theState = context.getPreprocessingState();
     this.currentInCloneSource = theState.peekFile();
@@ -317,6 +325,22 @@ public final class PreprocessorContext {
    */
   public boolean isAllowWhitespace() {
     return this.allowWhitespace;
+  }
+  
+  /**
+   * Set flag to interpret unknown variable value as FALSE.
+   * @param flag true to turn on mode when unknown variable will be recognized as FALSE
+   */
+  public void setUnknownVariableAsFalse(final boolean flag) {
+    this.unknownVariableAsFalse = flag;
+  }
+  
+  /**
+   * Get flag shows that unknown variable is recognized as FALSE.
+   * @return true if unknown variable must be recognized as FALSE.
+   */
+  public boolean isUnknownVariableAsFalse() {
+    return this.unknownVariableAsFalse;
   }
   
   /**
@@ -759,10 +783,11 @@ public final class PreprocessorContext {
    * Find value among local and global variables for a name. It finds in the order: special processors, local variables, global variables
    *
    * @param name the name for the needed variable, it will be normalized to the supported format
+   * @param enforceUnknownVarAsNull if true then state of the unknownVariableAsFalse flag in context will be ignored
    * @return false if either the variable is not found or the name is null, otherwise the variable value
    */
   @Nullable
-  public Value findVariableForName(@Nullable final String name) {
+  public Value findVariableForName(@Nullable final String name, final boolean enforceUnknownVarAsNull) {
     if (name == null) {
       return null;
     }
@@ -784,7 +809,14 @@ public final class PreprocessorContext {
       return val;
     }
 
-    return globalVarTable.get(normalized);
+    Value result = globalVarTable.get(normalized);
+  
+    if (result == null && !enforceUnknownVarAsNull && this.unknownVariableAsFalse) {
+      logDebug("Unknown variable '"+name+"' is replaced by FALSE!");
+      result = Value.BOOLEAN_FALSE;
+    }
+    
+    return result;
   }
 
   /**
@@ -880,6 +912,26 @@ public final class PreprocessorContext {
     return keepNonExecutingLines;
   }
 
+  /**
+   * Check that the preprocessor must copy file attributes.
+   * 
+   * @return true if the preprocessor must copy file attributes, false otherwise.
+   */
+  public boolean isCopyFileAttributes() {
+    return this.copyFileAttributes;
+  }
+  
+  /**
+   * Set the flag to copy file attributes.
+   * @param value true if file attributes must be copied, false otherwise.
+   * @return the preprocessor context
+   */
+  @Nonnull
+  public PreprocessorContext setCopyFileAttributes(final boolean value) {
+    this.copyFileAttributes = value;
+    return this;
+  }
+  
   /**
    * Set a preprocessor extension, it is a module implements the PreprocessorExtension interface which can process and get some calls from a preprocessor during its work
    *

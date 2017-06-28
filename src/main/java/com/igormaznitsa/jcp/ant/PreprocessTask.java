@@ -40,6 +40,7 @@ import org.apache.tools.ant.Task;
 import com.igormaznitsa.meta.annotation.ImplementationNote;
 import com.igormaznitsa.meta.annotation.MustNotContainNull;
 import static com.igormaznitsa.meta.common.utils.Assertions.*;
+import com.igormaznitsa.jcp.utils.PreprocessorUtils;
 
 /**
  * The class implements an ANT task to allow calls for preprocessing from ANT build scripts. Also it allows to out messages from preprocessor directives into the ANT log and read
@@ -66,6 +67,8 @@ public class PreprocessTask extends Task implements PreprocessorLogger, SpecialV
   private boolean compareDestination = false;
   private boolean allowWhitespace = false;
   private boolean preserveIndent = false;
+  private boolean copyFileAttributes = false;
+  private boolean unknownVarAsFalse = false;
   
   private Map<String, Value> antVariables;
   private final List<Global> globalVariables = new ArrayList<Global>();
@@ -122,6 +125,14 @@ public class PreprocessTask extends Task implements PreprocessorLogger, SpecialV
     }
   }
 
+  /**
+   * Set the "copyfileattributes", it turns on mode to copy file attributes if file generated or copied.
+   * @param flag true if to copy attributes, false otherwise
+   */
+  public void setCopyFileAttributes(final boolean flag) {
+    this.copyFileAttributes = flag;
+  }
+  
   /**
    * Set the "allowWhitespace", it allows to manage the mode to allow whitespace between the // and the #.
    * @param flag true if whitespace is allowed, false otherwise
@@ -193,6 +204,14 @@ public class PreprocessTask extends Task implements PreprocessorLogger, SpecialV
     this.outCharSet = charSet;
   }
 
+  /**
+   * Set the "unknownVarAsFalse" attribute, it allows to interpret unknown variables as FALSE.
+   * @param flag true to turn on the mode, false otherwise.
+   */
+  public void setUnknownVarAsFalse(final boolean flag) {
+    this.unknownVarAsFalse = flag;
+  }
+  
   /**
    * Set the "excluded" attribute, it defines the excluded file extensions which will be ignored by the preprocessor in its work (also those files will not be copied)
    *
@@ -335,9 +354,11 @@ public class PreprocessTask extends Task implements PreprocessorLogger, SpecialV
     context.setCareForLastNextLine(this.careForLastNextLine);
     context.setAllowWhitespace(this.allowWhitespace);
     context.setPreserveIndent(this.preserveIndent);
+    context.setCopyFileAttributes(this.copyFileAttributes);
+    context.setUnknownVariableAsFalse(this.unknownVarAsFalse);
     
     if (this.excludedFolders!=null && !this.excludedFolders.isEmpty()) {
-      context.setExcludedFolderPatterns(this.excludedFolders.split("\\"+File.pathSeparator));
+      context.setExcludedFolderPatterns(PreprocessorUtils.splitForChar(this.excludedFolders,File.pathSeparatorChar));
     }
     
     fillCfgFiles(context);

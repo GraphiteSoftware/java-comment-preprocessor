@@ -82,7 +82,9 @@ public final class JCPreprocessor {
     new GlobalVariableHandler(),
     new CareForLastNextLineCharHandler(),
     new PreserveIndentDirectiveHandler(),
-    new ExcludeFoldersHandler()
+    new ExcludeFoldersHandler(),
+    new CopyFileAttributesHandler(),
+    new UnknownAsFalseHandler()  
   };
 
   @Nonnull
@@ -198,7 +200,7 @@ public final class JCPreprocessor {
             if (context.isVerbose()) {
               context.logForVerbose("Copy file " + PreprocessorUtils.getFilePath(fileRef.getSourceFile()) + " -> {dst}" + fileRef.getDestinationFilePath());
             }
-            PreprocessorUtils.copyFile(fileRef.getSourceFile(), destinationFile);
+            PreprocessorUtils.copyFile(fileRef.getSourceFile(), destinationFile, context.isCopyFileAttributes());
             copFileCounter++;
           }
         }

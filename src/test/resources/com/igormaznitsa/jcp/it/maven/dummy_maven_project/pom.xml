@@ -43,7 +43,7 @@
       <plugin>
         <groupId>com.igormaznitsa</groupId>
         <artifactId>jcp</artifactId>
-        <version>6.1.2-SNAPSHOT</version>
+        <version>6.1.3-SNAPSHOT</version>
         <executions>
           <execution>
             <id>generateSources</id>
@@ -52,6 +52,7 @@
               <goal>preprocess</goal>
             </goals>
             <configuration>
+              <copyFileAttributes>true</copyFileAttributes>
               <allowWhitespace>true</allowWhitespace>
               <careForLastNextLine>true</careForLastNextLine>
               <verbose>true</verbose>

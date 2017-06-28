@@ -63,6 +63,13 @@ public class PreprocessTaskTest {
   }
 
   @Test
+  public void testCopyFileAttributes() throws Exception {
+    assertFalse(antTask.generatePreprocessorContext().isCopyFileAttributes());
+    antTask.setCopyFileAttributes(true);
+    assertTrue(antTask.generatePreprocessorContext().isCopyFileAttributes());
+  }
+  
+  @Test
   public void testExcludedFolders() throws Exception {
     assertArrayEquals(new String[0], antTask.generatePreprocessorContext().getExcludedFolderPatterns());
     antTask.setExcludedFolders(".git"+File.pathSeparator+"**/.cvs"+File.pathSeparator+".hg");
@@ -108,6 +115,13 @@ public class PreprocessTaskTest {
 
   @Test
   public void testSetOutCharset() throws Exception {
+    final String TEST = "ISO-8859-1";
+    antTask.setOutCharset(TEST);
+    assertEquals("Must be the same charset", TEST, antTask.generatePreprocessorContext().getOutCharacterEncoding());
+  }
+
+  @Test
+  public void testSetUnknownAsFalse() throws Exception {
     final String TEST = "ISO-8859-1";
     antTask.setOutCharset(TEST);
     assertEquals("Must be the same charset", TEST, antTask.generatePreprocessorContext().getOutCharacterEncoding());
@@ -181,7 +195,7 @@ public class PreprocessTaskTest {
     global.setName("hello_world");
     global.setValue("4");
 
-    final Value value = antTask.generatePreprocessorContext().findVariableForName("hello_world");
+    final Value value = antTask.generatePreprocessorContext().findVariableForName("hello_world",true);
     assertEquals("Must be 4", Value.INT_FOUR, value);
   }
 

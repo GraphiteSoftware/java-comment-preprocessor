@@ -74,6 +74,13 @@ public class PreprocessorMojo extends AbstractMojo implements PreprocessorLogger
   private String source;
 
   /**
+   * Copy file attributes for copied and generated files.
+   * @since 6.1.2
+   */
+  @Parameter(alias = "copyFileAttributes", defaultValue = "false")
+  private boolean copyFileAttributes;
+  
+  /**
    * The Destination folder where generated sources will be placed in non-test mode.
    */
   @Parameter(alias = "destination", defaultValue = "${project.build.directory}/generated-sources/preprocessed")
@@ -116,6 +123,12 @@ public class PreprocessorMojo extends AbstractMojo implements PreprocessorLogger
   @Parameter(alias = "processing")
   private String processing;
 
+  /**
+   * Flag to interpret unknown variable as FALSE.
+   */
+  @Parameter(alias="unknownVarAsFalse", defaultValue = "false") 
+  private boolean unknownVarAsFalse;
+  
   /**
    * Make dry run of the preprocessor without any saving of result.
    */
@@ -241,6 +254,14 @@ public class PreprocessorMojo extends AbstractMojo implements PreprocessorLogger
     return this.preserveIndent;
   }
   
+  public void setCopyFileAttributes(final boolean flag) {
+    this.copyFileAttributes = flag;
+  }
+  
+  public boolean getCopyFileAttributes() {
+    return this.copyFileAttributes;
+  }
+  
   public void setUseTestSources(final boolean flag) {
     this.useTestSources = flag;
   }
@@ -354,6 +375,14 @@ public class PreprocessorMojo extends AbstractMojo implements PreprocessorLogger
     return this.excluded;
   }
 
+  public void setUnknownVarAsFalse(final boolean flag) {
+    this.unknownVarAsFalse = flag;
+  }
+  
+  public boolean getUnknownVarAsFalse() {
+    return this.unknownVarAsFalse;
+  }
+  
   public void setProcessing(@Nullable final String processing) {
     this.processing = processing;
   }
@@ -503,6 +532,7 @@ public class PreprocessorMojo extends AbstractMojo implements PreprocessorLogger
     info("Preprocess sources : " + context.getSourceDirectories());
     info("Preprocess destination : " + context.getDestinationDirectory());
 
+    context.setUnknownVariableAsFalse(this.unknownVarAsFalse);
     context.setCompareDestination(this.compareDestination);
     context.setClearDestinationDirBefore(this.clear);
     context.setCareForLastNextLine(this.careForLastNextLine);
@@ -513,6 +543,7 @@ public class PreprocessorMojo extends AbstractMojo implements PreprocessorLogger
     context.setAllowWhitespace(this.allowWhitespace);
     context.setPreserveIndent(this.preserveIndent);
     context.setExcludedFolderPatterns(this.excludedFolders);
+    context.setCopyFileAttributes(this.copyFileAttributes);
     
     // process cfg files
     if (this.cfgFiles != null && this.cfgFiles.length != 0) {

@@ -15,41 +15,35 @@
  */
 package com.igormaznitsa.jcp.cmdline;
 
-import java.io.File;
-import com.igormaznitsa.jcp.context.PreprocessorContext;
-import com.igormaznitsa.jcp.utils.PreprocessorUtils;
-
-import java.util.Locale;
-
 import javax.annotation.Nonnull;
 
+import com.igormaznitsa.jcp.context.PreprocessorContext;
+
 /**
- * The Handler of subfolder names to be excluded from preprocessing, allows ANT pattern matching.
+ * The handler processing the flag tells the preprocessor to be try to keep
+ * non-executing lines of code as commented ones
  *
  * @author Igor Maznitsa (igor.maznitsa@igormaznitsa.com)
  */
-public class ExcludeFoldersHandler implements CommandLineHandler {
+public class UnknownAsFalseHandler implements CommandLineHandler {
 
-  private static final String ARG_NAME = "/ED:";
+  private static final String ARG_NAME = "/U";
 
   @Override
   @Nonnull
   public String getDescription() {
-    return "subfolders in source folders to be excluded from preprocessing, ANT patterns allowed, path separator should be used for multiple items";
+    return "interpret unknown variable as FALSE";
   }
 
   @Override
   public boolean processCommandLineKey(@Nonnull final String key, @Nonnull final PreprocessorContext context) {
     boolean result = false;
 
-    if (!key.isEmpty() && key.toUpperCase(Locale.ENGLISH).startsWith(ARG_NAME)) {
-      final String tail = PreprocessorUtils.extractTrimmedTail(ARG_NAME, key);
-      
-      if (!tail.isEmpty()) {
-        context.setExcludedFolderPatterns(PreprocessorUtils.splitForChar(tail,File.pathSeparatorChar));
-        result = true;
-      }
+    if (ARG_NAME.equalsIgnoreCase(key)) {
+      context.setUnknownVariableAsFalse(true);
+      result = true;
     }
+
     return result;
   }
 
@@ -58,4 +52,5 @@ public class ExcludeFoldersHandler implements CommandLineHandler {
   public String getKeyName() {
     return ARG_NAME;
   }
+
 }
